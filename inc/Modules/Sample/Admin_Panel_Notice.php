@@ -2,10 +2,10 @@
 /**
  * Admin Panel Notice.
  *
- * @package PublisherName
+ * @package AmericaMagazine
  */
 
-namespace PublisherName\Modules\Sample;
+namespace AmericaMagazine\Modules\Sample;
 
 defined( 'ABSPATH' ) || exit;
 

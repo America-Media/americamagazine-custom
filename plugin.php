@@ -6,16 +6,16 @@
  * Version: 1.0.0
  * Author: Publisher Name
  * Author URI: Publisher Website
- * Text Domain: publisher-name
+ * Text Domain: america-magazine
  *
  * For more information on WordPress plugin headers, see the following page:
  * https://developer.wordpress.org/plugins/plugin-basics/header-requirements/
  *
- * @package PublisherName
+ * @package AmericaMagazine
  */
 
 // Ensure that everything is namespaced.
-namespace PublisherName;
+namespace AmericaMagazine;
 
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
@@ -31,7 +31,7 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 		function() {
 			?>
 			<div class="notice notice-error">
-				<p><?php esc_html_e( 'Publisher Name plugin was not properly built.', 'publisher-name' ); ?></p>
+				<p><?php esc_html_e( 'Publisher Name plugin was not properly built.', 'america-magazine' ); ?></p>
 			</div>
 			<?php
 		}

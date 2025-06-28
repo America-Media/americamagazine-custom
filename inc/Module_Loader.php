@@ -2,10 +2,10 @@
 /**
  * Module Loader
  *
- * @package PublisherName
+ * @package AmericaMagazine
  */
 
-namespace PublisherName;
+namespace AmericaMagazine;
 
 defined( 'ABSPATH' ) || exit;
 

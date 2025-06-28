@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Publisher Name custom plugin
- * Plugin URI: https://newspack.com
- * Description: One plugin to rule them all.
+ * Plugin Name: America Magazine custom plugin
+ * Plugin URI: https://github.com/America-Media/americamagazine-custom/
+ * Description: Custom features for americamagazine.org on Newspack
  * Version: 1.0.0
- * Author: Publisher Name
- * Author URI: Publisher Website
+ * Author: America Media 
+ * Author URI: https://www.americamagazine.org
  * Text Domain: america-magazine
  *
  * For more information on WordPress plugin headers, see the following page:

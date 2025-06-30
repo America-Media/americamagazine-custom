@@ -35,10 +35,10 @@ class Module_Loader {
 	 */
 	public static function add_admin_menu() {
 		add_options_page(
-			'Custom Modules',
-			'Custom Modules',
+			'America Customization',
+			'America Customization',
 			'manage_options',
-			'custom-modules',
+			'america-customization',
 			[ __CLASS__, 'render_admin_page' ]
 		);
 	}
@@ -50,7 +50,7 @@ class Module_Loader {
 	 * @return array
 	 */
 	public static function add_allowed_options( $options ) {
-		$options['custom-modules'] = [ self::MODULES_OPTION_NAME ];
+		$options['america-customization'] = [ self::MODULES_OPTION_NAME ];
 		return $options;
 	}
 
@@ -67,11 +67,11 @@ class Module_Loader {
 		$available_modules = self::get_available_modules();
 		?>
 		<div class="wrap">
-			<h1>Custom Modules</h1>
-			<p>Enable or disable Custom modules</p>
+			<h1>America magazine customization</h1>
+			<p>Enable or disable America magazine customization modules</p>
 			<form method="post" action="options.php">
-				<?php wp_nonce_field( 'custom-modules-options' ); ?>
-				<input type="hidden" name="option_page" value="custom-modules">
+				<?php wp_nonce_field( 'america-customization-options' ); ?>
+				<input type="hidden" name="option_page" value="america-customization">
 				<input type="hidden" name="action" value="update">
 				<table class="form-table" role="presentation">
 					<tbody>

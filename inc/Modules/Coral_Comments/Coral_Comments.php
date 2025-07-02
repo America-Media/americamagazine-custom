@@ -71,7 +71,7 @@ class Coral_Comments {
 				'americamagazine-coral',
 				plugin_dir_url( __FILE__ ) . 'js/americamagazine-coral.js',
 				array( 'coral-embed-script' ),
-				null,
+				'0.0.1-dev20250602',
 				array( 'strategy' => 'defer' )
 			);
 

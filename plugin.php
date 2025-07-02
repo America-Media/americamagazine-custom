@@ -7,6 +7,7 @@
  * Author: America Media 
  * Author URI: https://www.americamagazine.org
  * Text Domain: america-magazine
+ * Requires Plugins: piano
  *
  * For more information on WordPress plugin headers, see the following page:
  * https://developer.wordpress.org/plugins/plugin-basics/header-requirements/

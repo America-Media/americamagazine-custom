@@ -31,9 +31,9 @@ $coral_local_mode = get_option( 'coral_local_mode' );
 
 $america_coral_settings = [
 	'coralRootURL' => $coral_url,
-	'storyID' => $story_id,
-	'storyURL' => wp_get_canonical_url(),
-	'localMode' => $coral_local_mode !== 'server',
+	'storyID'      => $story_id,
+	'storyURL'     => wp_get_canonical_url(),
+	'localMode'    => $coral_local_mode !== 'server',
 ];
 
 wp_enqueue_script( 'coral-embed-script' );
@@ -46,5 +46,13 @@ wp_add_inline_script(
 );
 
 ?>
-	<div id="coral_thread"></div>
+<button id="coral-comments-toggle" class="comments-toggle">
+	<div class="coral-comments-show-hide"><?php echo wp_kses( newspack_get_icon_svg( 'chevron_right', 24 ), newspack_sanitize_svgs() ); ?></div>
+	<span class="coral-comments-show-hide">Show</span>
+	<div class="coral-comments-show-hide" hidden><?php echo wp_kses( newspack_get_icon_svg( 'chevron_left', 24 ), newspack_sanitize_svgs() ); ?></div>
+	<span class="coral-comments-show-hide" hidden>Hide</span>&nbsp;Comments (
+	<span class="coral-count" data-coral-id="<?php echo esc_attr( $story_id ); ?>" data-coral-url="<?php echo esc_url( wp_get_canonical_url() ); ?>" data-coral-notext="true"></span>)
+</button>
+<div id="coral-thread" class="coral-comments-show-hide" hidden></div>
+
 <?php

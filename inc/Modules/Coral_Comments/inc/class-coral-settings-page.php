@@ -67,6 +67,15 @@ class Coral_Settings_Page {
 		);
 
 		add_settings_field(
+			'coral_piano_jwt_validation_key',
+			__( 'Piano JWT Validation Key', 'coral-project' ),
+			array( __CLASS__, 'render_piano_jwt_validation_key_field' ),
+			'coral-settings',
+			'about-coral'
+		);
+		register_setting( 'coral-settings', 'coral_piano_jwt_validation_key' );
+
+		add_settings_field(
 			'coral_jwt_signing_key',
 			__( 'JWT Signing Key', 'coral-project' ),
 			array( __CLASS__, 'render_jwt_signing_key_field' ),
@@ -74,6 +83,24 @@ class Coral_Settings_Page {
 			'about-coral'
 		);
 		register_setting( 'coral-settings', 'coral_jwt_signing_key' );
+
+		add_settings_field(
+			'coral_subscriber_resource_id',
+			__( 'Resource ID to badge subscribers', 'coral-project' ),
+			array( __CLASS__, 'render_subscriber_resource_id_field' ),
+			'coral-settings',
+			'about-coral'
+		);
+		register_setting( 'coral-settings', 'coral_subscriber_resource_id' );
+
+		add_settings_field(
+			'coral_subscriber_mode',
+			__( 'Subscriber Integration Mode', 'coral-project' ),
+			array( __CLASS__, 'render_subscriber_mode_field' ),
+			'coral-settings',
+			'about-coral'
+		);
+		register_setting( 'coral-settings', 'coral_subscriber_mode' );
 
 		add_settings_field(
 			'coral_local_mode',
@@ -120,6 +147,28 @@ class Coral_Settings_Page {
 	}
 
 	/**
+	 * Prints input field for Piano JWT Validation Key setting.
+	 *
+	 * @since 0.0.1
+	 */
+	public static function render_piano_jwt_validation_key_field() {
+		?>
+		<input
+			style="width: 600px; height: 40px;"
+			name="coral_piano_jwt_validation_key"
+			placeholder="Obtain key from Piano dashboard User Provider settings"
+			id="coral_piano_jwt_validation_key"
+			type="text"
+			value="<?php echo esc_attr( get_option( 'coral_piano_jwt_validation_key' ) ); ?>"
+		/>
+		<p class="description">
+			Key to validate JWTs provided and signed by Piano ID. Can be found in the Piano dashboard.<br>
+			Click "Edit Business," then go to "User Provider," and copy from "Piano ID JWT Shared Secret."
+		</p>
+		<?php
+	}
+
+	/**
 	 * Prints input field for JWT Signing Key setting.
 	 *
 	 * @since 0.0.1
@@ -134,8 +183,82 @@ class Coral_Settings_Page {
 			type="text"
 			value="<?php echo esc_attr( get_option( 'coral_jwt_signing_key' ) ); ?>"
 		/>
-		<p class="description">Key to sign JWTs for Coral authentication, found in 
-			<a href="<?php echo esc_url( get_option( 'coral_base_url' ) ); ?>/admin/configure/auth" target="_blank">Coral Authentication Settings</a>.
+		<p class="description">
+			Key to sign JWTs for Coral authentication. Can be found in 
+			<a href="<?php echo esc_url( get_option( 'coral_base_url' ) ); ?>/admin/configure/auth" target="_blank">
+				Coral Authentication Settings
+			</a>.
+		</p>
+		<?php
+	}
+
+	/**
+	 * Prints input field for Coral Subscriber Resource ID setting.
+	 *
+	 * @since 0.0.1
+	 */
+	public static function render_subscriber_resource_id_field() {
+		?>
+		<input
+			style="width: 600px; height: 40px;"
+			name="coral_subscriber_resource_id"
+			placeholder="Resource ID (rid) as found in the Piano dashboard"
+			id="coral_subscriber_resource_id"
+			type="text"
+			value="<?php echo esc_attr( get_option( 'coral_subscriber_resource_id' ) ); ?>"
+		/>
+		<p class="description">
+			Piano resource ID (rid) to determine subscription status (usually <samp>unlimited-access</samp>).<br/>
+			If this setting is blank, Coral will default to allowing all registered users to comment.
+		</p>
+		<?php
+	}
+
+	/**
+	 * Prints input field for subscriber mode setting.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function render_subscriber_mode_field() {
+		$subscriber_mode = esc_attr( get_option( 'coral_subscriber_mode' ) )
+		?>
+		<select
+				style="width: 600px; height: 40px;"
+				name="coral_subscriber_mode"
+				placeholder=""
+				id="coral_subscriber_mode"
+				type="select"
+		>
+		<option value="allow-registered"
+				<?php 
+				if ( $subscriber_mode === 'allow-registered' ) {
+					echo 'selected="selected"'; 
+				}
+				?>
+			>
+				Allow all registered users to comment
+			</option>
+			<option value="badge-subscribers"
+				<?php 
+				if ( $subscriber_mode === 'badge-subscribers' ) {
+					echo 'selected="selected"'; 
+				}
+				?>
+			>
+				Allow all registered users to comment and show a badge for subscribers
+			</option>
+			<option value="subscribers-only"
+				<?php 
+				if ( $subscriber_mode === 'subscribers-only' ) {
+					echo 'selected="selected"'; 
+				}
+				?>
+			>
+				Restrict commenting access to subscribers
+			</option>
+	</select>
+		<p class="description">
+			Control how access to comments interacts with user subscription status, determined according to resource ID set above
 		</p>
 		<?php
 	}
@@ -146,7 +269,7 @@ class Coral_Settings_Page {
 	 * @since 1.0.0
 	 */
 	public static function render_local_mode_field() {
-		$development_mode = esc_attr( get_option( 'coral_local_mode' ) )
+		$local_mode = esc_attr( get_option( 'coral_local_mode' ) )
 		?>
 		<select
 				style="width: 600px; height: 40px;"
@@ -157,7 +280,7 @@ class Coral_Settings_Page {
 		>
 		<option value="local"
 				<?php 
-				if ( $development_mode === 'local' ) {
+				if ( $local_mode === 'local' ) {
 					echo 'selected="selected"'; 
 				}
 				?>
@@ -166,7 +289,7 @@ class Coral_Settings_Page {
 			</option>
 			<option value="server"
 				<?php 
-				if ( $development_mode === 'server' ) {
+				if ( $local_mode === 'server' ) {
 					echo 'selected="selected"'; 
 				}
 				?>

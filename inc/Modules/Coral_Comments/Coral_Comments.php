@@ -128,7 +128,7 @@ class Coral_Comments {
 		try {
 			$piano_token_data = (array) JWT::decode( $piano_token, $piano_key );
 		} catch ( SignatureInvalidException $e ) {
-			// TODO return REST API error response
+			// If we cannot decode the token, treat the user as not logged in and return null
 			$piano_token_data = null;
 		}
 
@@ -136,6 +136,9 @@ class Coral_Comments {
 		$coral_badges = [];
 
 		$piano_user = self::get_piano_user( $piano_token_data['sub'] );
+		if ( is_wp_error( $piano_user ) ) {
+			return $piano_user;
+		}
 		$commenting_roles_field = array_find( 
 			$piano_user->custom_fields, 
 			function ( $item ) {
@@ -163,6 +166,9 @@ class Coral_Comments {
 		if ( ( 'badge-subscribers' === $subscriber_mode || 'subscribers-only' === $subscriber_mode ) && ! empty( $rid_for_subscribers ) ) {
 
 			$subscriber_access = self::get_resource_access( $piano_user->uid, $rid_for_subscribers );
+			if ( is_wp_error( $subscriber_access ) ) {
+				return $subscriber_access;
+			}
 		
 			if ( 'badge-subscribers' === $subscriber_mode && 'COMMENTER' === $coral_role && ! empty( $subscriber_access ) ) {
 				$coral_badges[] = 'subscriber';
@@ -196,7 +202,7 @@ class Coral_Comments {
 	 * @param string $path The path for the API method.
 	 * @param array  $params An array of params to pass in query string to the API.
 	 *
-	 * @return object
+	 * @return array|WP_Error
 	 */
 	public static function make_piano_api_call( $path, $params ) {
 		// We need the Piano plugin classes in order to be able to call the API easily
@@ -216,8 +222,11 @@ class Coral_Comments {
 
 		$response = wp_remote_retrieve_body( $request );
 
-		// TODO handle reposible response errors
-
+		// Handle HTTP-level errors; otherwise Piano returns a HTTP 200 and then its own response code of 0 === success
+		if ( is_wp_error( $response ) ) {
+			$response->add( 'piano_api_call_failed', 'Failure during HTTP request', [ 'failed_request' => $request ] );
+		}
+		
 		$json = json_decode( $response );
 
 		return $json;
@@ -228,10 +237,13 @@ class Coral_Comments {
 	 * 
 	 * @param string $uid The Piano user ID.
 	 * 
-	 * @return object|null 
+	 * @return object|null|WP_Error
 	 */
 	public static function get_piano_user( $uid ) {
 		$api_response = self::make_piano_api_call( '/publisher/user/get', [ 'uid' => $uid ] );
+		if ( is_wp_error( $api_response ) ) {
+			return $api_response;
+		}
 		if ( 0 !== $api_response->code ) {
 			return null;
 		} else {
@@ -245,7 +257,7 @@ class Coral_Comments {
 	 * @param string $uid The Piano user ID.
 	 * @param string $rid The Piano resource ID.
 	 * 
-	 * @return object|null
+	 * @return object|null|WP_Error
 	 */
 	public static function get_resource_access( $uid, $rid ) {
 		$api_response = self::make_piano_api_call(
@@ -255,6 +267,9 @@ class Coral_Comments {
 				'rid' => $rid,
 			] 
 		);
+		if ( is_wp_error( $api_response ) ) {
+			return $api_response;
+		}
 		if ( 0 !== $api_response->code || ! property_exists( $api_response, 'access' ) ) {
 			return null;
 		} else {

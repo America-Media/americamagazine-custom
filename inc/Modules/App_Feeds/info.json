@@ -1,0 +1,4 @@
+{
+	"name": "App Feeds",
+	"description": "This module provides endpoints for the America app to access content from the CMS."
+}

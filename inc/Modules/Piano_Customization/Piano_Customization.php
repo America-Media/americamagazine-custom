@@ -50,7 +50,10 @@ class Piano_Customization {
 			$categories = get_the_terms( $item->ID, 'category' );
 			$channel_names = [ 'politics-society', 'faith', 'arts-culture', 'magazine', 'community' ];
 
-			$tags_for_tp_push = [ 'wp-id:' . $item->ID ];
+			$tags_for_tp_push = [ 
+				'wp-id:' . $item->ID,   // the post ID to distinguish an individual piece of content
+				'platform:newspack',     // so that Piano Composer can be targeted to run only in Newspack
+			];
 
 			/* Node ID for backwards compatibility to Drupal */
 			$nid = get_post_meta( $item->ID, '_fgd2wp_old_node_id', true );

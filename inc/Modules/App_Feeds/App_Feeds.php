@@ -86,15 +86,18 @@ class App_Feeds {
 		$query = new WP_Query( $args );
 		$posts = array_map( [ __CLASS__, 'format_post_data' ], $query->posts );
 
-		return rest_ensure_response(
-			[
+		$response = $posts;
+		if ( $request['debug'] ) {
+			$response = [
 				'total'        => (int) $query->found_posts,
 				'total_pages'  => (int) $query->max_num_pages,
 				'current_page' => $page,
 				'per_page'     => $per_page,
 				'posts'        => $posts,
-			]
-		);
+			];
+		}
+
+		return rest_ensure_response( $response );
 	}
 
 	/**

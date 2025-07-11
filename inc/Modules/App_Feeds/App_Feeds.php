@@ -46,41 +46,37 @@ class App_Feeds {
 	/**
 	 * Handle the app-all-content endpoint
 	 * 
-	 * @param array $request The request sent to the endpoint.
+	 * @param WP_REST_Request $request The request sent to the endpoint.
 	 * 
 	 * @return array
 	 */
 	public static function handle_app_all_content_request( $request ) {
 
-		$id           = absint( $request['id'] );
-		$topic        = absint( $request['topic'] );
-		$author       = absint( $request['author'] );
-		$content_type = absint( $request['content_type'] );
-		$page         = max( 1, absint( $request['page'] ) );
-		$per_page     = 10; // default to 10 and may implement as a real parameter in future
+		$post_ids         = self::ids_from_query_param( $request['id'] );
+		$topic_ids        = self::ids_from_query_param( $request['topic'] );
+		$author_ids       = self::ids_from_query_param( $request['author'] );
+		$content_type_ids = self::ids_from_query_param( $request['content_type'] );
+		$page             = max( 1, absint( $request['page'] ) );
+		$per_page         = 10; // default to 10 and may implement as a real parameter in future
 		
-		if ( $id ) {
-			$post = get_post( $id );
-			if ( ! $post || $post->post_type !== 'post' ) {
-				return new WP_Error( 'post_not_found', esc_html( 'Could not find a post for id ' . $id ), [ 'status' => 404 ] );
-			}
-			return rest_ensure_response( self::format_post_data( $post ) );
-		}
-
 		$args = [
 			'post_type'      => 'post',
+			'post_status'    => 'publish',
 			'posts_per_page' => $per_page,
 			'paged'          => $page,
 		];
 
-		if ( $topic ) {
-			$args['tag_id'] = $topic;
+		if ( ! empty( $post_ids ) ) {
+			$args['post__in'] = $post_ids;
 		}
-		if ( $author ) {
-			$args['author'] = $author;
+		if ( ! empty( $topic_ids ) ) {
+			$args['tag__in'] = $topic_ids;
 		}
-		if ( $content_type ) {
-			$args['cat'] = $content_type;
+		if ( ! empty( $author_ids ) ) {
+			$args['author__in'] = $author_ids;
+		}
+		if ( ! empty( $content_type_ids ) ) {
+			$args['cat__in'] = $content_type_ids;
 		}
 
 		$query = new WP_Query( $args );
@@ -89,6 +85,10 @@ class App_Feeds {
 		$response = $posts;
 		if ( $request['debug'] ) {
 			$response = [
+				'id'           => $post_ids,
+				'topic'        => $topic_ids,
+				'author'       => $author_ids,
+				'content_type' => $content_type_ids,
 				'total'        => (int) $query->found_posts,
 				'total_pages'  => (int) $query->max_num_pages,
 				'current_page' => $page,
@@ -98,6 +98,20 @@ class App_Feeds {
 		}
 
 		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Return an array of IDs from a query parameter
+	 * 
+	 * @param string $query_param The query parameter to be processed.
+	 * 
+	 * @return array
+	 */
+	public static function ids_from_query_param( $query_param ) {
+		if ( ! empty( $query_param ) ) {
+			return preg_split( '/[^0-9]/', $query_param );
+		}
+		return [];
 	}
 
 	/**

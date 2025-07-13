@@ -8,6 +8,7 @@
 namespace AmericaMagazine\Modules\App_Feeds;
 
 use WP_Query;
+use WP_User_Query;
 use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
@@ -32,12 +33,52 @@ class App_Feeds {
 	 * @return void
 	 */
 	public static function register_app_feeds_endpoints() {
+		// App All Content
 		register_rest_route(
 			'america-magazine/v1',
 			'/app-all-content/',
 			array(
 				'methods'             => 'GET',
 				'callback'            => [ __CLASS__, 'handle_app_all_content_request' ],
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		// App Authors Feed
+		register_rest_route(
+			'america-magazine/v1',
+			'/app-authors-feed/',
+			array(
+				'methods'             => 'GET',
+				'callback'            => [ __CLASS__, 'handle_app_authors_feed_request' ],
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		// App Topics Feed
+		register_rest_route(
+			'america-magazine/v1',
+			'/app-topics-feed/',
+			array(
+				'methods'             => 'GET',
+				'callback'            => [ __CLASS__, 'handle_app_topics_feed_request' ],
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		// App Search
+		register_rest_route(
+			'america-magazine/v1',
+			'/app-search',
+			array(
+				'methods'             => 'GET',
+				'callback'            => [ __CLASS__, 'handle_app_search_request' ],
+				'args'                => [
+					'search' => [
+						'required'          => true,
+						'sanitize_callback' => 'sanitize_text_field',
+					],
+				],
 				'permission_callback' => '__return_true',
 			)
 		);
@@ -101,6 +142,83 @@ class App_Feeds {
 	}
 
 	/**
+	 * Handle the app-all-content endpoint
+	 * 
+	 * @param WP_REST_Request $request The request sent to the endpoint.
+	 * 
+	 * @return array
+	 */
+	public static function handle_app_authors_feed_request( $request ) {
+
+		$args = [
+			'number'              => 10,
+			'has_published_posts' => true,
+			'fields'              => [ 'id', 'user_nicename', 'display_name' ],
+			'orderby'             => [ 'post_count' => 'DESC' ],
+		];
+
+		$author_ids = self::ids_from_query_param( $request['id'] );
+		$page_requested = $request['page'];
+
+		if ( ! empty( $author_ids ) ) {
+			$args['include'] = $author_ids;
+		}
+		if ( ! empty( $page_requested ) ) {
+			$args['paged'] = $page_requested;
+		}
+
+		$query = new WP_User_Query( $args );
+		$users = array_map( [ __CLASS__, 'format_user_data' ], $query->results );
+
+		return rest_ensure_response( $users );
+	}
+
+	/**
+	 * Handle the app-all-content endpoint
+	 * 
+	 * @param WP_REST_Request $request The request sent to the endpoint.
+	 * 
+	 * @return array
+	 */
+	public static function handle_app_topics_feed_request( $request ) {
+		return rest_ensure_response( self::format_terms_list( get_tags() ) );
+	}
+
+	/**
+	 * Format search results data as expected by the app
+	 *
+	 * @param array $request The request sent to the endpoint.
+	 *
+	 * @return array
+	 */
+	public static function handle_app_search_request( $request ) {
+		$search_query = $request->get_param( 'search' );
+
+		$query = new WP_Query(
+			[
+				's'              => $search_query,
+				'post_type'      => 'post',
+				'post_status'    => 'publish',
+				'fields'         => 'ids', // Only return IDs
+				'posts_per_page' => 10,
+			] 
+		);
+
+		if ( empty( $query->posts ) ) {
+			return rest_ensure_response( [] );
+		}
+
+		$results = array_map(
+			function ( $id ) {
+				return [ 'id' => $id ];
+			},
+			$query->posts 
+		);
+
+		return rest_ensure_response( $results );
+	}
+
+	/**
 	 * Return an array of IDs from a query parameter
 	 * 
 	 * @param string $query_param The query parameter to be processed.
@@ -144,7 +262,24 @@ class App_Feeds {
 			'author_id'    => $post->post_author,
 			'url'          => get_permalink( $post ),
 			'image'        => get_the_post_thumbnail_url( $post ),
-			'image_credit' => get_post_meta( $post->ID, 'image_caption', true ),
+			'image_credit' => wp_filter_nohtml_kses( get_post_meta( $post->ID, 'image_caption', true ) ),
+		];
+	}
+
+	/**
+	 * Format user data as expected by the app
+	 * 
+	 * @param WP_User $user The user to be formatted.
+	 * 
+	 * @return array
+	 */
+	public static function format_user_data( $user ) {
+		return [
+			'name'  => $user->display_name,
+			'id'    => $user->ID,
+			'bio'   => get_user_meta( $user->ID, 'description' )[0],
+			'image' => get_avatar_url( $user->ID ),
+			'url'   => get_site_url() . '/author/' . $user->user_nicename,
 		];
 	}
 

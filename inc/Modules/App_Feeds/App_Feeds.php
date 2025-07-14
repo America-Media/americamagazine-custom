@@ -82,6 +82,34 @@ class App_Feeds {
 				'permission_callback' => '__return_true',
 			)
 		);
+
+		// App Author Search
+		register_rest_route(
+			'america-magazine/v1',
+			'/app-search-authors',
+			array(
+				'methods'             => 'GET',
+				'callback'            => [ __CLASS__, 'handle_app_search_authors_request' ],
+				'args'                => [
+					'author' => [
+						'required'          => true,
+						'sanitize_callback' => 'sanitize_text_field',
+					],
+				],
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		// App Author Search Literal (stub to return an empty array for backwards compatibility with Drupal)
+		register_rest_route(
+			'america-magazine/v1',
+			'/app-search-authors-literal',
+			array(
+				'methods'             => 'GET',
+				'callback'            => [ __CLASS__, 'handle_app_search_authors_literal_request' ],
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
 	/**
@@ -168,7 +196,7 @@ class App_Feeds {
 		}
 
 		$query = new WP_User_Query( $args );
-		$users = array_map( [ __CLASS__, 'format_user_data' ], $query->results );
+		$users = array_map( [ __CLASS__, 'format_user_data_extended' ], $query->results );
 
 		return rest_ensure_response( $users );
 	}
@@ -218,6 +246,68 @@ class App_Feeds {
 		return rest_ensure_response( $results );
 	}
 
+	/**
+	 * Format author search results data as expected by the app
+	 *
+	 * @param array $request The request sent to the endpoint.
+	 *
+	 * @return array
+	 */
+	public static function handle_app_search_authors_request( $request ) {
+		$author_query = $request->get_param( 'author' );
+
+		$query = new WP_User_Query(
+			[
+				'number'              => 50,
+				'has_published_posts' => true,
+				'fields'              => [ 'id', 'user_nicename', 'display_name' ],
+				'orderby'             => [ 'post_count' => 'DESC' ],
+				'meta_query'          => [
+					'relation' => 'OR',
+					[
+						'key'     => 'nickname',
+						'value'   => $author_query,
+						'compare' => 'LIKE',
+					],
+					[
+						'key'     => 'first_name',
+						'value'   => $author_query,
+						'compare' => 'LIKE',
+					],
+					[
+						'key'     => 'last_name',
+						'value'   => $author_query,
+						'compare' => 'LIKE',
+					],
+				],
+			] 
+		);
+
+		$users = array_map(
+			[ __CLASS__, 'format_user_data' ], 
+			array_filter(
+				$query->results,
+				function( $i ) {
+					// We only want users that have real-world display names, indicated by a space somewhere in them
+					return strpos( $i->display_name, ' ' );
+				} 
+			) 
+		);
+
+		return rest_ensure_response( array_values( $users ) );
+	}
+
+	/**
+	 * Stub for the search authors literal endpoint for backwards compatibility to drupal
+	 *
+	 * @param array $request The request sent to the endpoint.
+	 *
+	 * @return array
+	 */
+	public static function handle_app_search_authors_literal_request( $request ) {
+		return rest_ensure_response( [] );
+	}
+	
 	/**
 	 * Return an array of IDs from a query parameter
 	 * 
@@ -270,18 +360,38 @@ class App_Feeds {
 	 * Format user data as expected by the app
 	 * 
 	 * @param WP_User $user The user to be formatted.
+	 * @param bool    $extended True to add bio, image, and url; false for just name and id.
+	 * 
+	 * @return array
+	 */
+	public static function format_user_data_extended( $user, $extended = true ) {
+		
+		$formatted_user = [
+			'name' => $user->display_name,
+			'id'   => $user->ID,
+		];
+
+		if ( $extended ) {
+			$formatted_user['bio']   = get_user_meta( $user->ID, 'description' )[0];
+			$formatted_user['image'] = get_avatar_url( $user->ID );
+			$formatted_user['url']   = get_site_url() . '/author/' . $user->user_nicename;
+		}
+		
+		return $formatted_user;
+	}
+
+	/**
+	 * Format user data as expected by the app with just name and ID
+	 * 
+	 * @param WP_User $user The user to be formatted.
 	 * 
 	 * @return array
 	 */
 	public static function format_user_data( $user ) {
-		return [
-			'name'  => $user->display_name,
-			'id'    => $user->ID,
-			'bio'   => get_user_meta( $user->ID, 'description' )[0],
-			'image' => get_avatar_url( $user->ID ),
-			'url'   => get_site_url() . '/author/' . $user->user_nicename,
-		];
+		return self::format_user_data_extended( $user, false );
 	}
+
+
 
 	/**
 	 * Format a terms list to focus on id and name

@@ -41,7 +41,8 @@ wp_enqueue_script( 'coral-count-script' );
 wp_enqueue_script( 'americamagazine-coral' );
 wp_add_inline_script(
 	'americamagazine-coral',
-	'const AmericaCoralSettings = ' . json_encode( $america_coral_settings ),
+	'if ( ! window.americaSettings ) { window.americaSettings = {}; }' .
+	'americaSettings.coral = ' . json_encode( $america_coral_settings ) . ';',
 	'before'
 );
 

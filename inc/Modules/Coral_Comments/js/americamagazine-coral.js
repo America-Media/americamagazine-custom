@@ -1,6 +1,20 @@
-/* global tp localStorage AmericaCoralSettings Coral */
+/* global tp americaSettings localStorage  Coral */
 ( function () {
-	const getCoralToken = async function () {
+	// Set up objects
+	tp = window.tp || [];
+	if ( ! window.americaUtils ) {
+		window.americaUtils = {};
+	}
+	const americaUtils = window.americaUtils;
+
+	americaUtils.toggleHidden = function ( className ) {
+		const toggleElements = document.getElementsByClassName( className );
+		for ( const e of toggleElements ) {
+			e.hidden = ! e.hidden;
+		}
+	};
+
+	americaUtils.getCoralToken = async function () {
 		if ( ! tp.pianoId.isUserValid() ) {
 			localStorage.removeItem( 'america-coral-token' );
 			return null;
@@ -47,36 +61,41 @@
 			} );
 	};
 
-	if ( AmericaCoralSettings ) {
-		window.americaCoralEmbed = Coral.createStreamEmbed( {
+	if ( americaSettings.coral ) {
+		// Set up the coral embed
+		americaUtils.coralEmbed = Coral.createStreamEmbed( {
 			id: 'coral-thread',
 			autoRender: false,
-			rootURL: AmericaCoralSettings.coralRootURL,
-			storyID: AmericaCoralSettings.storyID,
-			storyURL: AmericaCoralSettings.localMode
+			rootURL: americaSettings.coral.coralRootURL,
+			storyID: americaSettings.coral.storyID,
+			storyURL: americaSettings.coral.localMode
 				? undefined // In local mode, avoid storing invalid URLs with Coral
-				: AmericaCoralSettings.storyURL,
+				: americaSettings.coral.storyURL,
 		} );
 
+		// Wire up the comments toggle
 		document
 			.getElementById( 'coral-comments-toggle' )
 			.addEventListener( 'click', function () {
-				if ( ! window.americaCoralEmbed.rendered ) {
-					getCoralToken()
-						.then( ( token ) => {
-							return ( window.americaCoralEmbed.config.accessToken =
-								token );
-						} )
-						.then( () => {
-							window.americaCoralEmbed.render();
-						} );
+				if ( ! americaUtils.coralEmbed.rendered ) {
+					// TODO consider loading animation before we start the Coral token process
+					// getCoralToken depends on login state, so it cannot run before Piano inits
+					tp.push( [
+						'init',
+						() => {
+							americaUtils
+								.getCoralToken()
+								.then( ( token ) => {
+									americaUtils.coralEmbed.config.accessToken =
+										token;
+								} )
+								.then( () => {
+									window.americaUtils.coralEmbed.render();
+								} );
+						},
+					] );
 				}
-				const toggleElements = document.getElementsByClassName(
-					'coral-comments-show-hide'
-				);
-				for ( const e of toggleElements ) {
-					e.hidden = ! e.hidden;
-				}
+				americaUtils.toggleHidden( 'coral-comments-show-hide' );
 			} );
 	}
 } )();

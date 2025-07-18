@@ -22,18 +22,28 @@ class Piano_Customization {
 	 * @return void
 	 */
 	public static function init() {
+		require_once __DIR__ . '/inc/Piano_Settings_Page.php';
+
+		wp_register_script(
+			'americamagazine-piano',
+			plugin_dir_url( __FILE__ ) . 'js/americamagazine-piano.js',
+			array(),
+			'1.0.0',
+			array( 'strategy' => 'defer' )
+		);
+
 		/**
 		 * Since the Piano plugin does not register/enqueue a script but simply outputs it in a wp_footer 
 		 * action, we unfortunately need to mimic this, but with priority ahead of the default 10, in order
-		 * to make sure our script can load its Piano commands to the tp object before Piano Composer starts 
+		 * to make sure our script can load its Piano tags to the tp object before Piano Composer starts 
 		 */
 		add_action( 'wp_footer', [ __CLASS__, 'piano_custom_tags_in_footer' ], 9 );
 
 		/**
-		 * Add styles & script for UX with Piano ID accounts (styles to head, script to footer with Piano script)
+		 * Add styles & script for UX with Piano ID accounts (styles to head, script enqueued normally)
 		 */
 		add_action( 'wp_head', [ __CLASS__, 'piano_id_account_styles' ] );
-		add_action( 'wp_footer', [ __CLASS__, 'piano_id_account_scripts' ] );
+		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'piano_enqueue_scripts' ] );
 	}
 
 	/**
@@ -163,7 +173,8 @@ class Piano_Customization {
 		<style type="text/css">
 			.wp_piano_id_button.hide, 
 			.wp_piano_id_account_button.hide, 
-			.wp_piano_id_logged_in.hide {
+			.wp_piano_id_logged_in.hide,
+			.wp_piano_subscribe_button.hide {
 				display: none!important;
 			}
 		</style>
@@ -171,54 +182,21 @@ class Piano_Customization {
 	}
 
 	/**
-	 * Add styles to support Piano ID accounts
+	 * Enqueue scripts to support Piano ID accounts & other functionality
 	 * 
 	 * @return void
 	 */
-	public static function piano_id_account_scripts() {
-		?>
-		<script type="text/javascript">
-			(function() {
-				/** 
-				 * Since the stock Piano plugin does not make an account item visible on login,
-				 * we need to watch for the addition of the "hide" class on the login button.
-				 * But we only need to watch on one of however many login buttons might be available.
-				 */
-				const pianoIdLoginButton = document.getElementsByClassName("wp_piano_id_button")[0];
-				const unhideLoggedInItemsWatcher = new MutationObserver((mutations) => {
-					mutations.forEach( (mutation) => {
-						if ("attributes" === mutation.type && "class" === mutation.attributeName 
-							&& mutation.target.classList.contains("hide")
-						) {
-							const loggedInElements = document.getElementsByClassName("wp_piano_id_logged_in");
-							for (const e of loggedInElements) {
-								e.classList.remove("hide");
-							}
-						}
-					});	
-				});
-				if (pianoIdLoginButton) {
-					unhideLoggedInItemsWatcher.observe(pianoIdLoginButton, { attributes: true, attributeFilter: ["class"] });
-				}
+	public static function piano_enqueue_scripts() {
+		wp_enqueue_script( 'americamagazine-piano' );
 
-				// Wire the logout link to a Piano ID action
-				const pianoIdLogoutButtons = document.getElementsByClassName("wp_piano_id_logout");
-				for (const e of pianoIdLogoutButtons) {
-					e.addEventListener("click", (() => {
-							tp.pianoId.logout();
-
-							// Clear local storage of America custom items
-							Object.keys(localStorage)
-								.filter((k) => k.startsWith("america-"))
-								.forEach((k) => localStorage.removeItem(k));
-							
-							// After logout, return to homepage
-							location.href = "/";
-						}
-					));
-				}
-			})();
-		</script>
-		<?php
+		$america_piano_settings = [
+			'subscriber_rid' => esc_html( get_option( 'piano_subscriber_resource_id' ) ),
+		];
+		wp_add_inline_script(
+			'americamagazine-piano',
+			'if ( ! window.americaSettings ) { window.americaSettings = {}; }' .
+			'americaSettings.piano = ' . json_encode( $america_piano_settings ) . ';',
+			'before'
+		);
 	}
 }

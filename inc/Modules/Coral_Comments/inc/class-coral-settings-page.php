@@ -86,7 +86,7 @@ class Coral_Settings_Page {
 
 		add_settings_field(
 			'coral_subscriber_resource_id',
-			__( 'Resource ID to badge subscribers', 'coral-project' ),
+			__( 'Resource ID to recognize subscribers', 'coral-project' ),
 			array( __CLASS__, 'render_subscriber_resource_id_field' ),
 			'coral-settings',
 			'about-coral'

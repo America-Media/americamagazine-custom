@@ -1,0 +1,222 @@
+#coral {
+	--palette-text-500: #16171b;
+	--palette-grey-500: #16171b;
+	--palette-grey-300: #e3e5e8;
+	--font-family-primary: karla;
+	--font-family-secondary: karla;
+	--palette-primary-500: #a12014;
+	--palette-primary-700: #bf2c1f;
+	--font-weight-primary-regular: 400;
+	--font-size-2: 14px;
+	--font-size-3: 16px;
+}
+
+.coral-tabBar {
+	border-bottom: 1px solid #e3e5e8;
+}
+
+.coral-tabBar-tab {
+	background: transparent;
+	border: none;
+	border-bottom: 2px solid transparent;
+	font-family: var(--newspack-theme-font-heading);
+	font-size: var(--font-size-3);
+	padding: 4px 16px;
+	line-height: 1.5;
+	font-weight: 400;
+}
+
+.coral-tabBar-tab.coral-tabBar-tab-active {
+	color: var(--palette-text-500);
+}
+
+.coral-tabBar-tab.coral-tabBar-tab-active::before {
+	height: 2px;
+	left: 0;
+	width: 100%;
+	top: 100%;
+	margin-top: -2px;
+}
+
+.coral-tabBar-tab.coral-tabBar-notifications {
+	padding: 4px;
+	border: none;
+	background: transparent;
+}
+
+.coral-tabBar-tab.coral-tabBar-notifications svg {
+	width: 20px;
+	height: 20px;
+}
+
+.coral-viewerBox-logoutButton {
+	color: #16171b !important;
+	text-decoration: underline;
+}
+
+.coral-viewerBox-logoutButton:hover {
+	text-decoration: none;
+}
+
+.coral-viewerBox-usernameLabel {
+	font-size: var(--font-size-2);
+}
+
+.coral-viewerBox-username {
+	font-size: var(--font-size-3);
+}
+
+[class*="UserBoxAuthenticated-signOut-"] {
+	font-size: var(--font-size-2);
+}
+
+.coral-guidelines {
+	background: #f7f8fa;
+	border-radius: 0;
+	padding: 16px;
+	margin: 0 0 24px;
+}
+
+.coral-guidelines-content {
+	font-size: var(--font-size-2);
+}
+
+.coral-guidelines-content a {
+	color: #16171b;
+	text-decoration: underline;
+}
+
+.coral-guidelines-content a:hover {
+	text-decoration: none;
+}
+
+.coral-guidelines-content ul {
+	padding-left: 20px;
+}
+
+.coral-commentForm {
+	border-radius: 2px;
+	border: 1px solid #b1b1b6;
+}
+
+[class*="Box-root"] > div {
+	margin-bottom: 0;
+}
+
+#comments-postCommentForm-form [class*="Typography-detail-"] {
+	font-size: var(--font-size-2);
+	color: #5e5f66;
+}
+
+#comments-postCommentForm-form .coral-createComment-submit {
+	margin-top: 8px;
+	background: #16171b;
+	color: #fff;
+	border-radius: 4px;
+	text-transform: capitalize;
+	border: none;
+}
+
+#comments-postCommentForm-form .coral-createComment-submit[disabled] {
+	background: #16171b;
+	color: #414247;
+}
+
+[class*="StreamContainer-tabBarContainer-"] {
+	border-bottom-color: #e3e5e8;
+}
+
+.coral-tabBarSecondary .coral-tabBarSecondary-tab {
+	font-size: var(--font-size-2);
+	color: #16171b;
+	padding: 6px 16px;
+}
+
+.coral-tabBarSecondary .coral-tabBarSecondary-tab-active {
+	border-bottom: 2px solid #a12014;
+}
+
+.coral-tabBarSecondary .coral-tabBarSecondary-tab .coral-counter {
+	background: #a12014;
+	font-size: 8px;
+	font-weight: 500;
+	padding: 2px;
+	border-radius: 2px;
+	min-width: 16px;
+}
+
+[class*="SortMenu-label-"] {
+	font-size: var(--font-size-3);
+}
+
+.coral-selectField {
+	font-size: 16px;
+	border: none;
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-left: 0;
+}
+
+.coral-comment-username span {
+	font-size: var(--font-size-3);
+}
+
+[class*="Comment-innerTopBar-"] time {
+	font-size: var(--font-size-2);
+}
+
+.coral-comment-content {
+	font-size: var(--font-size-3);
+}
+
+[class*="Button-fontSizeSmall-"] {
+	font-size: var(--font-size-2);
+}
+
+.coral-indent {
+	border-left-color: #16171b;
+}
+
+.coral-comment-inReplyToText {
+	font-size: var(--font-size-2);
+}
+
+.coral-comment-inReplyToUsername {
+	font-size: var(--font-size-2);
+}
+
+#report-comments-form {
+	font-size: var(--font-size-2);
+}
+
+[class*="ReportCommentForm-heading"] {
+	font-size: var(--font-size-2);
+}
+
+[class*="RadioButton-label-"] {
+	font-size: var(--font-size-3);
+}
+
+[class*="Button-upperCase-"] {
+	text-transform: capitalize;
+}
+
+[class*="DownloadCommentsContainer-title"] {
+	font-size: var(--font-size-3);
+}
+
+[class*="DownloadCommentsContainer-description-"] {
+	font-size: var(--font-size-2);
+}
+
+[class*="HistoryComment-commentOn-"] {
+	font-size: var(--font-size-2);
+}
+
+[class*="HistoryComment-StoryTitle-"] {
+	font-size: var(--font-size-3);
+}
+
+[class*="HistoryComment-content-"] .coral-myComment-content {
+	font-size: var(--font-size-2);
+}

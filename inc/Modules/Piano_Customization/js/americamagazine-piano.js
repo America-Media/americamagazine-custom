@@ -75,6 +75,9 @@
 	// Modify the UX to reflect account state
 	americaUtils.configureAccountUx = function () {
 		if ( tp.pianoId.isUserValid() ) {
+			// Identify logged in status to the whole page
+			document.body.classList.add( 'piano-logged-in' );
+
 			// The stock Piano plugin hides the login button, so we only need to unhide UX for logged-in users
 			americaUtils.forEachElementBySelector(
 				'.wp_piano_id_logged_in',
@@ -96,9 +99,10 @@
 				}
 			);
 
-			// Hide the subscribe button for subscribers
+			// Adjust UX for subscribers
 			americaUtils.getSubscriberAccess().then( ( subscribed ) => {
 				if ( subscribed ) {
+					document.body.classList.add( 'piano-subscriber' );
 					americaUtils.forEachElementBySelector(
 						'.wp_piano_subscribe_button',
 						( e ) => {

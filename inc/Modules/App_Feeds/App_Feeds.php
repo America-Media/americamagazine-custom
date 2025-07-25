@@ -132,6 +132,17 @@ class App_Feeds {
 				'permission_callback' => '__return_true',
 			)
 		);
+
+		// America Today app "homepage"
+		register_rest_route( 
+			'america-magazine/v1',
+			'/app-reels',
+			array(
+				'methods'             => 'GET',
+				'callback'            => [ __CLASS__, 'handle_reels_request' ],
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
 	/**
@@ -448,6 +459,40 @@ class App_Feeds {
 				get_field( 'app_category', 'options' )
 			),
 		];
+
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Handle request for reels
+	 *
+	 * @param array $request The request sent to the endpoint.
+	 *
+	 * @return array
+	 */
+	public static function handle_reels_request( $request ) {
+		$reels_query = new WP_Query(
+			[
+				'post_type'   => 'app-reels-feature',
+				'post_status' => 'publish',
+			]
+		);
+
+		$response = array_map(
+			function( $reel ) {
+				return [
+					'title'          => get_the_title( $reel ),
+					'blurb'          => get_the_excerpt( $reel ),
+					'content_link'   => [
+						'url'  => get_field( 'content_url', $reel ),
+						'text' => get_field( 'link_text', $reel ),
+					],
+					'vertical_image' => get_the_post_thumbnail_url( $reel ),
+					'vertical_video' => get_field( 'vertical_video', $reel ),
+				];
+			},
+			$reels_query->posts
+		);
 
 		return rest_ensure_response( $response );
 	}

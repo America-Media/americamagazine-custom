@@ -473,8 +473,9 @@ class App_Feeds {
 	public static function handle_reels_request( $request ) {
 		$reels_query = new WP_Query(
 			[
-				'post_type'   => 'app-reels-feature',
-				'post_status' => 'publish',
+				'post_type'      => 'app-reels-feature',
+				'post_status'    => 'publish',
+				'posts_per_page' => 10,
 			]
 		);
 

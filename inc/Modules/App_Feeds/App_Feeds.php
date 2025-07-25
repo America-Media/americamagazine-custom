@@ -110,6 +110,28 @@ class App_Feeds {
 				'permission_callback' => '__return_true',
 			)
 		);
+
+		// Word app feed for lectionary days, with date as a path parameter
+		register_rest_route(
+			'america-magazine/v1',
+			'/word-app/(?P<date>\d{4}-\d{2}-\d{2})',
+			array(
+				'methods'             => 'GET',
+				'callback'            => [ __CLASS__, 'handle_word_app_request' ],
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		// America Today app "homepage"
+		register_rest_route( 
+			'america-magazine/v1',
+			'/app-america-today',
+			array(
+				'methods'             => 'GET',
+				'callback'            => [ __CLASS__, 'handle_america_today_request' ],
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
 	/**
@@ -307,7 +329,147 @@ class App_Feeds {
 	public static function handle_app_search_authors_literal_request( $request ) {
 		return rest_ensure_response( [] );
 	}
-	
+
+	/**
+	 * Handle request for a specfic lectionary day for Word app functionality
+	 *
+	 * @param array $request The request sent to the endpoint.
+	 *
+	 * @return array
+	 */
+	public static function handle_word_app_request( $request ) {
+		$lectionary_date_query = new WP_Query(
+			[
+				'post_type'   => 'lectionary_date',
+				'post_status' => 'publish',
+				'meta_key'    => 'calendar_date',
+				'meta_value'  => $request['date'],
+			] 
+		);
+
+		$response = [];
+
+		foreach ( $lectionary_date_query->posts as $post ) {
+			$response[] = [
+				'title'                                 => 
+					$post->post_title,
+				'field_calendar_date'                   => 
+					get_post_meta( $post->ID, 'calendar_date', true ),
+				'field_word_app_related_content_export' => 
+					self::get_lectionary_date_related_content( $post->ID ),
+			];
+		}
+
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Return content of related posts for a lectionary date request
+	 *
+	 * @param int $post_id The post ID for which to return related content.
+	 *
+	 * @return array
+	 */
+	public static function get_lectionary_date_related_content( $post_id ) {
+		$related_content_query = new WP_Query(
+			[
+				'post__in' => array_unique( get_field( 'word_app_related_content', $post_id ) ),
+			] 
+		);
+
+		$related_content = array_map(
+			function( $related_post ) {
+				return [
+					'id'        => $related_post->ID,
+					'title'     => $related_post->title,
+					'url'       => get_permalink( $related_post ),
+					'body'      => $related_post->post_content,
+					'by_author' => [
+						[
+							'id'      => $related_post->post_author,
+							'title'   => get_the_author_meta( 'display_name', $related_post->post_author ),
+							'uid'     => null,
+							'created' => gmdate( 'D, d/m/Y - H:i', strtotime( get_userdata( $related_post->post_author )->user_registered ) ),                         
+						],   
+					],
+					'image'     => get_the_post_thumbnail_url( $related_post ),
+					'section'   => self::format_terms_list( get_the_category( $related_post->ID ) )[0],
+					'uid'       => null,
+					'created'   => gmdate( 'D, d/m/Y - H:i', get_post_timestamp( $related_post ) ),
+				];
+			},
+			$related_content_query->posts
+		);
+
+		return $related_content;
+	} 
+
+	/**
+	 * Handle request for America Today
+	 *
+	 * @param array $request The request sent to the endpoint.
+	 *
+	 * @return array
+	 */
+	public static function handle_america_today_request( $request ) {
+		if ( ! function_exists( 'get_field' ) ) {
+			return new WP_Error( 'scf_missing', 'SCF not active', [ 'status' => 500 ] );
+		}
+
+		$response = [
+			'top_article'        => get_field( 'top_story', 'options' )->ID,
+			'secondary_articles' => self::ids_from_scf_options_field(
+				'secondary_articles',
+				'secondary_article'
+			),
+			'tertiary_articles'  => self::ids_from_scf_options_field( 
+				'tertiary_articles',
+				'tertiary_article'
+			),
+			'curated_topics'     => self::ids_from_scf_options_field(
+				'curated_topics',
+				'topic'
+			),
+			'curated_authors'    => self::ids_from_scf_options_field(
+				'curated_authors',
+				'author'
+			),
+			'donation_headline'  => get_field( 'donation_headline', 'options' ),
+			'donation_message'   => get_field( 'donation_message', 'options' ),
+			'categories'         => array_map( 
+				function( $cat ) {
+					return [
+						'app_image'     => $cat['app_image'],
+						'app_label'     => $cat['app_label'],
+						'taxonomy'      => 'Channel' === $cat['taxonomy_label'] ? 'channel' : 'topics',
+						'taxonomy_term' => 'Channel' === $cat['taxonomy_label'] ? $cat['taxonomy_term_category'] : $cat['taxonomy_term_tags'],
+					];
+				},
+				get_field( 'app_category', 'options' )
+			),
+		];
+
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Return an array of IDs from a SCF options field
+	 * 
+	 * @param string $field_name The name of the options field.
+	 * @param string $field_key The key of the ID field within the returned field data.
+	 * 
+	 * @return array
+	 */
+	public static function ids_from_scf_options_field( $field_name, $field_key ) {
+		$ids = wp_list_pluck(
+			get_field( $field_name, 'options' ),
+			$field_key
+		);
+
+		// Filter the array to remove any empty values (what array_filter does without a callback)
+		return array_filter( $ids );
+	}
+
 	/**
 	 * Return an array of IDs from a query parameter
 	 * 
@@ -390,8 +552,6 @@ class App_Feeds {
 	public static function format_user_data( $user ) {
 		return self::format_user_data_extended( $user, false );
 	}
-
-
 
 	/**
 	 * Format a terms list to focus on id and name

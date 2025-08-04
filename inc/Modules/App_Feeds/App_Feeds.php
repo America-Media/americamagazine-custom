@@ -483,7 +483,8 @@ class App_Feeds {
 			),
 		];
 
-		return rest_ensure_response( $response );
+		// Old Drupal format had the whole response wrapped in an array
+		return rest_ensure_response( [ $response ] );
 	}
 
 	/**

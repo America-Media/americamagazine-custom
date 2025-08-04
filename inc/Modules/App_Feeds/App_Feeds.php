@@ -427,24 +427,46 @@ class App_Feeds {
 			return new WP_Error( 'scf_missing', 'SCF not active', [ 'status' => 500 ] );
 		}
 
-		$response = [
-			'top_article'        => get_field( 'top_story', 'options' )->ID,
-			'secondary_articles' => self::ids_from_scf_options_field(
+		// Old Drupal format for top article had ID as a string
+		$top_article = strval( get_field( 'top_story', 'options' )->ID );
+
+		// Old Drupal format for secondary articles had an array of IDs as strings
+		$secondary_articles = array_map( 
+			'strval',
+			self::ids_from_scf_options_field(
 				'secondary_articles',
 				'secondary_article'
-			),
-			'tertiary_articles'  => self::ids_from_scf_options_field( 
-				'tertiary_articles',
-				'tertiary_article'
-			),
-			'curated_topics'     => self::ids_from_scf_options_field(
+			) 
+		);
+
+		// Old Drupal format for tertiary articles had an array of integer IDs
+		$tertiary_articles = self::ids_from_scf_options_field( 
+			'tertiary_articles',
+			'tertiary_article'
+		);
+
+		// Old Drupal format for curated topics & authors had IDs as a comma separated string
+		$curated_topics = implode(
+			', ',
+			self::ids_from_scf_options_field(
 				'curated_topics',
 				'topic'
-			),
-			'curated_authors'    => self::ids_from_scf_options_field(
+			)
+		);
+		$curated_authors = implode(
+			', ',
+			self::ids_from_scf_options_field(
 				'curated_authors',
 				'author'
-			),
+			)
+		);
+
+		$response = [
+			'top_article'        => $top_article,
+			'secondary_articles' => $secondary_articles,
+			'tertiary_articles'  => $tertiary_articles,
+			'curated_topics'     => $curated_topics,
+			'curated_authors'    => $curated_authors,
 			'donation_headline'  => get_field( 'donation_headline', 'options' ),
 			'donation_message'   => get_field( 'donation_message', 'options' ),
 			'categories'         => array_map( 
@@ -453,7 +475,8 @@ class App_Feeds {
 						'app_image'     => $cat['app_image'],
 						'app_label'     => $cat['app_label'],
 						'taxonomy'      => 'Channel' === $cat['taxonomy_label'] ? 'channel' : 'topics',
-						'taxonomy_term' => 'Channel' === $cat['taxonomy_label'] ? $cat['taxonomy_term_category'] : $cat['taxonomy_term_tags'],
+						// Old Drupal format had taxonomy_term with ID as string
+						'taxonomy_term' => strval( 'Channel' === $cat['taxonomy_label'] ? $cat['taxonomy_term_category'] : $cat['taxonomy_term_tags'] ),
 					];
 				},
 				get_field( 'app_category', 'options' )

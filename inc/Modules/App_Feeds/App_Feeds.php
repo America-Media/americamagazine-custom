@@ -580,7 +580,8 @@ class App_Feeds {
 			'disable_ads'  => (bool) get_post_meta( $post->ID, 'newspack_ads_suppress_ads', true ),
 			'body'         => apply_filters( 'the_content', $post->post_content ),
 			// video_embed field not present in WP
-			'author_name'  => get_the_author_meta( 'display_name', $post->post_author ),
+			// TODO: address multiple authors case — for now, wrap as an array because app expects it as such
+			'author_name'  => [ get_the_author_meta( 'display_name', $post->post_author ) ],
 			'author_id'    => $post->post_author,
 			'url'          => get_permalink( $post ),
 			'image'        => get_the_post_thumbnail_url( $post ),

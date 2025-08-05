@@ -593,7 +593,7 @@ class App_Feeds {
 
 		return [
 			'title'        => get_the_title( $post ),
-			'id'           => $post->ID,
+			'id'           => strval( $post->ID ), // Old Drupal produced this ID as a string
 			// format_terms_list expects & returns an array, but the app expects a single object for content_type
 			'content_type' => self::format_terms_list( [ $content_type ] )[0],
 			'topics'       => self::format_terms_list( get_the_tags( $post->ID ) ),

@@ -158,7 +158,8 @@ class App_Feeds {
 		$topic_ids        = self::ids_from_query_param( $request['topic'] );
 		$author_ids       = self::ids_from_query_param( $request['author'] );
 		$content_type_ids = self::ids_from_query_param( $request['content_type'] );
-		$page             = max( 1, absint( $request['page'] ) );
+		// App expects 0-based paging; WP_Query starts paging at 1
+		$page             = max( 1, absint( $request['page'] ) + 1 ); 
 		$per_page         = 10; // default to 10 and may implement as a real parameter in future
 		
 		$args = [
@@ -219,7 +220,8 @@ class App_Feeds {
 		];
 
 		$author_ids = self::ids_from_query_param( $request['id'] );
-		$page_requested = $request['page'];
+		// App expects 0-based paging; WP_Query starts paging at 1
+		$page_requested = $request['page'] + 1;
 
 		if ( ! empty( $author_ids ) ) {
 			$args['include'] = $author_ids;

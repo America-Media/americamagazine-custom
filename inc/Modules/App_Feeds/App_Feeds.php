@@ -353,8 +353,19 @@ class App_Feeds {
 			[
 				'post_type'   => 'lectionary_date',
 				'post_status' => 'publish',
-				'meta_key'    => 'calendar_date',
-				'meta_value'  => $request['date'],
+				'meta_query'  => [
+					// Due to Drupal migration, the calendar date field may or may not have hyphens
+					// so we query for both versions
+					'relation' => 'OR',
+					[
+						'key'   => 'calendar_date',
+						'value' => $request['date'],
+					],
+					[
+						'key'   => 'calendar_date',
+						'value' => str_replace( '-', '', $request['date'] ),
+					],
+				],
 			] 
 		);
 
@@ -365,7 +376,7 @@ class App_Feeds {
 				'title'                                 => 
 					$post->post_title,
 				'field_calendar_date'                   => 
-					get_post_meta( $post->ID, 'calendar_date', true ),
+					$request['date'],
 				'field_word_app_related_content_export' => 
 					self::get_lectionary_date_related_content( $post->ID ),
 			];
@@ -382,9 +393,19 @@ class App_Feeds {
 	 * @return array
 	 */
 	public static function get_lectionary_date_related_content( $post_id ) {
+		$related_content_ids = get_field( 'word_app_related_content', $post_id );
+		// Due to Drupal migration, the word_app_related_content meta can be either a string, int, or array
+		// We need an array of ints, so we turn it into that.
+		if ( is_array( $related_content_ids ) ) {
+			$related_content_ids = array_unique( $related_content_ids );
+		} else {
+			$related_content_ids = [ $related_content_ids ];
+		}
+		$related_content_ids = array_map( 'intval', $related_content_ids );
+
 		$related_content_query = new WP_Query(
 			[
-				'post__in' => array_unique( get_field( 'word_app_related_content', $post_id ) ),
+				'post__in' => $related_content_ids,
 			] 
 		);
 

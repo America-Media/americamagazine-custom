@@ -413,7 +413,7 @@ class App_Feeds {
 			function( $related_post ) {
 				return [
 					'id'        => $related_post->ID,
-					'title'     => $related_post->title,
+					'title'     => $related_post->post_title,
 					'url'       => get_permalink( $related_post ),
 					'body'      => $related_post->post_content,
 					'by_author' => [

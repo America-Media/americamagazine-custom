@@ -5,7 +5,7 @@
  * @package AmericaMagazine
  */
 
-namespace AmericaMagazine\Modules\Sample;
+namespace AmericaMagazine\Modules\General;
 
 /**
  * Here you can have code doing stuff. Just remember to always perform actions in a hook callback and never in the global scope.
@@ -15,4 +15,4 @@ namespace AmericaMagazine\Modules\Sample;
  * You don't need to use classes if you don't want to, but this is an
  * example of how classes files are automatically loaded if you follow the naming convention.
  */
-Admin_Panel_Notice::init();
+General::init();

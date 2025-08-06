@@ -67,6 +67,20 @@ class Coral_Comments {
 				null,
 				array( 'strategy' => 'defer' )
 			);
+			
+			// In order to work, the Coral count.js script requires class="coral-script" set on the <script> tag
+			add_filter(
+				'script_loader_tag',
+				function( $tag, $handle ) {
+					if ( 'coral-count-script' === $handle ) {
+						$tag = str_replace( '<script', '<script class="coral-script"', $tag );
+					}
+					return $tag;
+				},
+				10,
+				2
+			); 
+			
 			wp_register_script( 
 				'americamagazine-coral',
 				plugin_dir_url( __FILE__ ) . 'js/americamagazine-coral.js',

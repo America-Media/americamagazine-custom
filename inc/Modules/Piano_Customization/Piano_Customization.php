@@ -38,6 +38,11 @@ class Piano_Customization {
 		 * to make sure our script can load its Piano tags to the tp object before Piano Composer starts 
 		 */
 		add_action( 'wp_footer', [ __CLASS__, 'piano_custom_tags_in_footer' ], 9 );
+		/**
+		 * There are a few Piano ID settings that can't be handled by the stock Piano plugin.
+		 * We need to enqueu them in the footer before the Piano plugin script loads.
+		 */
+		add_action( 'wp_footer', [ __CLASS__, 'piano_id_commands_in_footer' ], 9 );
 
 		/**
 		 * Add styles & script for UX with Piano ID accounts (styles to head, script enqueued normally)
@@ -103,7 +108,7 @@ class Piano_Customization {
 			}
 
 			?>
-<script type="text/javascript">
+<script type="application/javascript">
 (function() {
 	tp = window["tp"] || [];
 	americaCustomTags = <?php echo json_encode( $tags_for_tp_push ); ?>;
@@ -137,6 +142,35 @@ class Piano_Customization {
 			<?php
 
 		}
+	}
+
+	/**
+	 * Builds Piano ID commands and pushes them to Piano Composer
+	 *
+	 * @return void
+	 */
+	public static function piano_id_commands_in_footer() {
+		$piano_cloudflare_worker_url = get_option( 'piano_cloudflare_worker_url' );
+		$piano_id_url = get_option( 'piano_id_url' );
+
+		$piano_id_commands_for_tp_push = [];
+
+		if ( ! empty( $piano_cloudflare_worker_url ) ) {
+			$piano_id_commands_for_tp_push[] = [ 'setCloudflareWorkerUrl', $piano_cloudflare_worker_url ];
+		}
+		if ( ! empty( $piano_id_url ) ) {
+			$piano_id_commands_for_tp_push[] = [ 'setPianoIdUrl', $piano_id_url ];
+		}
+
+		?>
+<script type="application/javascript">
+(function() {
+	tp = window["tp"] || [];
+	pianoIdCommands = <?php echo json_encode( $piano_id_commands_for_tp_push ); ?>;
+	pianoIdCommands.forEach( (command) => { tp.push(command); } );
+})();
+</script>
+		<?php
 	}
 
 	/**

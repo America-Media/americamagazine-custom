@@ -118,8 +118,8 @@
 }
 
 #comments-postCommentForm-form .coral-createComment-submit[disabled] {
-	background: #16171b;
 	color: #414247;
+	opacity: .5;
 }
 
 [class*="StreamContainer-tabBarContainer-"] {

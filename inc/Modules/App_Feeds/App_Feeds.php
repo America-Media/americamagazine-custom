@@ -156,6 +156,7 @@ class App_Feeds {
 
 		$post_ids         = self::ids_from_query_param( $request['id'] );
 		$topic_ids        = self::ids_from_query_param( $request['topic'] );
+		$channel_ids      = self::ids_from_query_param( $request['channel'] );
 		$author_ids       = self::ids_from_query_param( $request['author'] );
 		$content_type_ids = self::ids_from_query_param( $request['content_type'] );
 		// App expects 0-based paging; WP_Query starts paging at 1
@@ -183,8 +184,9 @@ class App_Feeds {
 		if ( ! empty( $author_ids ) ) {
 			$args['author__in'] = $author_ids;
 		}
-		if ( ! empty( $content_type_ids ) ) {
-			$args['cat__in'] = $content_type_ids;
+		// In Drupal, content_type meant section; both section and channel are categories in WordPress
+		if ( ! empty( $content_type_ids ) || ! empty( $channel_ids ) ) {
+			$args['category__in'] = array_merge( $content_type_ids, $channel_ids );
 		}
 
 		$query = new WP_Query( $args );

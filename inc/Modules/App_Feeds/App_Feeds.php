@@ -162,6 +162,11 @@ class App_Feeds {
 		$page             = max( 1, absint( $request['page'] ) + 1 ); 
 		$per_page         = 10; // default to 10 and may implement as a real parameter in future
 		
+		// App had hard-coded request for topic=1130 for the Vatican feed, needs to be 446 in WordPress
+		if ( 1 === count( $topic_ids ) && 1130 === intval( $topic_ids[0] ) ) {
+			$topic_ids = [ 446 ];
+		}
+		
 		$args = [
 			'post_type'      => 'post',
 			'post_status'    => 'publish',

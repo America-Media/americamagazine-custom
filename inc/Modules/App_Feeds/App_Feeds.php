@@ -182,7 +182,20 @@ class App_Feeds {
 			$args['tag__in'] = $topic_ids;
 		}
 		if ( ! empty( $author_ids ) ) {
-			$args['author__in'] = $author_ids;
+			// Translate author IDs to terms in the author taxonomy to handle co-authors
+			$author_term_names = array_map( 
+				function( $user_id ) {
+					return get_userdata( $user_id )->user_login;
+				},
+				$author_ids
+			);
+			$args['tax_query'] = [
+				[
+					'taxonomy' => 'author',
+					'field'    => 'name',
+					'terms'    => $author_term_names,
+				],
+			];
 		}
 		// In Drupal, content_type meant section; both section and channel are categories in WordPress
 		if ( ! empty( $content_type_ids ) || ! empty( $channel_ids ) ) {
@@ -195,15 +208,16 @@ class App_Feeds {
 		$response = $posts;
 		if ( $request['debug'] ) {
 			$response = [
-				'id'           => $post_ids,
-				'topic'        => $topic_ids,
-				'author'       => $author_ids,
-				'content_type' => $content_type_ids,
-				'total'        => (int) $query->found_posts,
-				'total_pages'  => (int) $query->max_num_pages,
-				'current_page' => $page,
-				'per_page'     => $per_page,
-				'posts'        => $posts,
+				'id'            => $post_ids,
+				'topic'         => $topic_ids,
+				'author'        => $author_ids,
+				'content_type'  => $content_type_ids,
+				'wp_query_args' => $args,
+				'total'         => (int) $query->found_posts,
+				'total_pages'   => (int) $query->max_num_pages,
+				'current_page'  => $page,
+				'per_page'      => $per_page,
+				'posts'         => $posts,
 			];
 		}
 
@@ -211,7 +225,7 @@ class App_Feeds {
 	}
 
 	/**
-	 * Handle the app-all-content endpoint
+	 * Handle the app-authors-feed endpoint
 	 * 
 	 * @param WP_REST_Request $request The request sent to the endpoint.
 	 * 
@@ -425,14 +439,17 @@ class App_Feeds {
 					'title'     => $related_post->post_title,
 					'url'       => get_permalink( $related_post ),
 					'body'      => $related_post->post_content,
-					'by_author' => [
-						[
-							'id'      => $related_post->post_author,
-							'title'   => get_the_author_meta( 'display_name', $related_post->post_author ),
-							'uid'     => null,
-							'created' => gmdate( 'D, d/m/Y - H:i', strtotime( get_userdata( $related_post->post_author )->user_registered ) ),                         
-						],   
-					],
+					'by_author' => array_map( 
+						function( $author_data ) {
+							return [
+								'id'      => $author_data->ID,
+								'title'   => $author_data->display_name,
+								'uid'     => null,
+								'created' => gmdate( 'D, d/m/Y - H:i', strtotime( $author_data->user_registered ) ),                         
+							];
+						},
+						wp_list_pluck( get_coauthors( $related_post->ID ), 'data' ) 
+					),
 					'image'     => get_the_post_thumbnail_url( $related_post ),
 					'section'   => self::format_terms_list( get_the_category( $related_post->ID ) )[0],
 					'uid'       => null,
@@ -604,6 +621,7 @@ class App_Feeds {
 		if ( count( $categories ) > 1 && in_array( $categories[0]->name, $channel_names, true ) ) {
 			$content_type = $categories[1];
 		}
+		$authors = wp_list_pluck( get_coauthors( $post->ID ), 'data' );
 
 		return [
 			'title'        => get_the_title( $post ),
@@ -615,9 +633,8 @@ class App_Feeds {
 			'disable_ads'  => (bool) get_post_meta( $post->ID, 'newspack_ads_suppress_ads', true ),
 			'body'         => apply_filters( 'the_content', $post->post_content ),
 			// video_embed field not present in WP
-			// TODO: address multiple authors case — for now, wrap as an array because app expects it as such
-			'author_name'  => [ get_the_author_meta( 'display_name', $post->post_author ) ],
-			'author_id'    => $post->post_author,
+			'author_name'  => wp_list_pluck( $authors, 'display_name' ),
+			'author_id'    => implode( ', ', wp_list_pluck( $authors, 'ID' ) ),
 			'url'          => get_permalink( $post ),
 			'image'        => get_the_post_thumbnail_url( $post ),
 			'image_credit' => wp_filter_nohtml_kses( get_post_meta( $post->ID, 'image_caption', true ) ),

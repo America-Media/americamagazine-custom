@@ -100,5 +100,17 @@
 				}
 				americaUtils.toggleHidden( 'coral-comments-show-hide' );
 			} );
+
+		tp.push( [
+			'addHandler',
+			'loginSuccess',
+			function () {
+				if ( americaUtils.coralEmbed.rendered ) {
+					americaUtils.getCoralToken().then( ( token ) => {
+						americaUtils.coralEmbed.login( token );
+					} );
+				}
+			},
+		] );
 	}
 } )();

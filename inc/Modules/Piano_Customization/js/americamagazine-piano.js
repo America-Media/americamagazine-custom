@@ -21,6 +21,13 @@
 		} );
 	};
 
+	americaUtils.showLogin = function ( e = null ) {
+		if ( e ) {
+			e.preventDefault();
+		}
+		tp.pianoId.show( { screen: 'login' } );
+	};
+
 	// Check if the currently logged in user has subscriber access
 	americaUtils.getSubscriberAccess = function () {
 		return new Promise( ( resolve, reject ) => {

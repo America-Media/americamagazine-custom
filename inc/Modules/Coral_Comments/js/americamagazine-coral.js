@@ -71,6 +71,9 @@
 			storyURL: americaSettings.coral.localMode
 				? undefined // In local mode, avoid storing invalid URLs with Coral
 				: americaSettings.coral.storyURL,
+			events: ( events ) => {
+				events.on( 'loginPrompt', americaUtils.showLogin );
+			},
 		} );
 
 		// Wire up the comments toggle

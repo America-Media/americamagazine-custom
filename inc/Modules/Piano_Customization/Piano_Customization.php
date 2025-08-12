@@ -28,7 +28,7 @@ class Piano_Customization {
 			'americamagazine-piano',
 			plugin_dir_url( __FILE__ ) . 'js/americamagazine-piano.js',
 			array(),
-			'1.0.1',
+			'1.0.2',
 			array( 'strategy' => 'defer' )
 		);
 
@@ -54,7 +54,6 @@ class Piano_Customization {
 		 * Add styles & script for UX with Piano ID accounts (styles to head, script enqueued normally)
 		 */
 		add_action( 'wp_head', [ __CLASS__, 'piano_id_account_styles' ] );
-
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'piano_enqueue_scripts' ] );
 	}
 

@@ -128,12 +128,14 @@
 			americaUtils.configureAccountUx();
 		},
 	] );
-	// Enqueue configure UX to run on login (handles user logs in on this page)
+	// Enqueue handler for user logging in on this page
 	tp.push( [
 		'addHandler',
 		'loginSuccess',
 		() => {
 			americaUtils.configureAccountUx();
+			// if the user logged in from a paywall modal, we should close it
+			tp.offer.close();
 		},
 	] );
 } )();

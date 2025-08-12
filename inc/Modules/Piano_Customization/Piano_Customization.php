@@ -77,7 +77,7 @@ class Piano_Customization {
 			}
 
 			/* Content-type for backwards compatibility to Drupal */
-			if ( get_post_type() === 'post ' ) {
+			if ( get_post_type() === 'post' ) {
 				$tags_for_tp_push[] = 'content-type:article';
 			} elseif ( get_post_type() === 'page' ) {
 				$tags_for_tp_push[] = 'content-type:page';

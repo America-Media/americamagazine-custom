@@ -45,9 +45,16 @@ class Piano_Customization {
 		add_action( 'wp_footer', [ __CLASS__, 'piano_id_commands_in_footer' ], 9 );
 
 		/**
+		 * Add a bottom ribbon div and styles for Piano Composer experiences to target
+		 */
+		add_action( 'wp_head', [ __CLASS__, 'piano_bottom_ribbon_styles' ] );
+		add_action( 'wp_footer', [ __CLASS__, 'piano_bottom_ribbon_div' ] );
+
+		/**
 		 * Add styles & script for UX with Piano ID accounts (styles to head, script enqueued normally)
 		 */
 		add_action( 'wp_head', [ __CLASS__, 'piano_id_account_styles' ] );
+
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'piano_enqueue_scripts' ] );
 	}
 
@@ -195,6 +202,36 @@ class Piano_Customization {
 				$name
 			)
 		);
+	}
+
+	/**
+	 * Add style for Piano bottom ribbon div
+	 * 
+	 * @return void
+	 */
+	public static function piano_bottom_ribbon_styles() {
+		?>
+		<style>
+			#bottom-ribbon {
+				bottom: 0;
+				height: auto;
+				position: fixed;
+				width: 100%;
+				z-index: 1500;
+			}	
+		</style>
+		<?php
+	}
+
+	/**
+	 * Add bottom ribbon div for Piano to target
+	 * 
+	 * @return void
+	 */
+	public static function piano_bottom_ribbon_div() {
+		?>
+		<div id="bottom-ribbon"></div>
+		<?php
 	}
 
 	/**

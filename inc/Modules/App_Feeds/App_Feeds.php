@@ -579,7 +579,12 @@ class App_Feeds {
 	 */
 	public static function ids_from_query_param( $query_param ) {
 		if ( ! empty( $query_param ) ) {
-			return preg_split( '/[^0-9]/', $query_param );
+			if ( is_array( $query_param ) ) {
+				// If the param is an array, split the individual elements and flatten the resulting array
+				return array_merge( ...array_map( [ __CLASS__, 'ids_from_query_param' ], $query_param ) );
+			} else {
+				return preg_split( '/[^0-9]/', $query_param );
+			}       
 		}
 		return [];
 	}

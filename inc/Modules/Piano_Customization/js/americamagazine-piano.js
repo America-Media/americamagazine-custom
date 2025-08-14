@@ -112,6 +112,29 @@
 				}
 			);
 
+			// Helper to close the mobile menu when attempting to log in
+			americaUtils.forEachElementBySelector(
+				'.wp_piano_id_button',
+				( e ) => {
+					e.addEventListener( 'click', () => {
+						if (
+							document.body.classList.contains(
+								'mobile-menu-opened'
+							)
+						) {
+							// Slight delay to allow for login to render before closing menu
+							setTimeout( () => {
+								document
+									.querySelector(
+										'#mobile-sidebar-fallback .mobile-menu-toggle'
+									)
+									.click();
+							}, 300 );
+						}
+					} );
+				}
+			);
+
 			// Wire the logout link to a Piano ID action
 			americaUtils.forEachElementBySelector(
 				'.wp_piano_id_logout',
@@ -126,6 +149,11 @@
 			americaUtils.getSubscriberAccess().then( ( subscribed ) => {
 				if ( subscribed ) {
 					document.body.classList.add( 'piano-subscriber' );
+					// Tag the mobile CTA subscribe button with the class we use
+					americaUtils.forEachElementBySelector( '.mb-cta', ( e ) => {
+						e.classList.add( 'wp_piano_subscribe_button' );
+					} );
+					// Hide subscribe buttons
 					americaUtils.forEachElementBySelector(
 						'.wp_piano_subscribe_button',
 						( e ) => {

@@ -28,7 +28,7 @@ class Piano_Customization {
 			'americamagazine-piano',
 			plugin_dir_url( __FILE__ ) . 'js/americamagazine-piano.js',
 			array(),
-			'1.0.5',
+			'1.0.6',
 			array( 'strategy' => 'defer' )
 		);
 

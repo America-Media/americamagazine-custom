@@ -100,6 +100,24 @@
 
 	// Modify the UX to reflect account state
 	americaUtils.configureAccountUx = function () {
+		// Helper to close the mobile menu during login (it covers up the login screen)
+		americaUtils.forEachElementBySelector( '.wp_piano_id_button', ( e ) => {
+			e.addEventListener( 'click', () => {
+				if (
+					document.body.classList.contains( 'mobile-menu-opened' )
+				) {
+					// Slight delay to allow for login to render before closing menu
+					setTimeout( () => {
+						document
+							.querySelector(
+								'#mobile-sidebar-fallback .mobile-menu-toggle'
+							)
+							.click();
+					}, 300 );
+				}
+			} );
+		} );
+
 		if ( tp.pianoId.isUserValid() ) {
 			// Identify logged in status to the whole page
 			document.body.classList.add( 'piano-logged-in' );
@@ -109,29 +127,6 @@
 				'.wp_piano_id_logged_in',
 				( e ) => {
 					e.classList.remove( 'hide' );
-				}
-			);
-
-			// Helper to close the mobile menu when attempting to log in
-			americaUtils.forEachElementBySelector(
-				'.wp_piano_id_button',
-				( e ) => {
-					e.addEventListener( 'click', () => {
-						if (
-							document.body.classList.contains(
-								'mobile-menu-opened'
-							)
-						) {
-							// Slight delay to allow for login to render before closing menu
-							setTimeout( () => {
-								document
-									.querySelector(
-										'#mobile-sidebar-fallback .mobile-menu-toggle'
-									)
-									.click();
-							}, 300 );
-						}
-					} );
 				}
 			);
 

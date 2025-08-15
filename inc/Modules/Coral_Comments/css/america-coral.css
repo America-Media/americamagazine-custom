@@ -54,9 +54,11 @@
 	text-decoration: underline;
 }
 
+/*
 .coral-viewerBox-logoutButton:hover {
 	text-decoration: none;
 }
+*/
 
 .coral-viewerBox-usernameLabel {
 	font-size: var(--font-size-2);
@@ -86,9 +88,11 @@
 	text-decoration: underline;
 }
 
+/*
 .coral-guidelines-content a:hover {
 	text-decoration: none;
 }
+*/
 
 .coral-guidelines-content ul {
 	padding-left: 20px;

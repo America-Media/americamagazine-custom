@@ -10,7 +10,7 @@
 	americaUtils.toggleHidden = function ( className ) {
 		const toggleElements = document.getElementsByClassName( className );
 		for ( const e of toggleElements ) {
-			e.hidden = ! e.hidden;
+			e.classList.toggle( 'hide' );
 		}
 	};
 

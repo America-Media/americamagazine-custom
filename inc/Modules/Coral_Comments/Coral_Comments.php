@@ -89,6 +89,9 @@ class Coral_Comments {
 				array( 'strategy' => 'defer' )
 			);
 
+			// Add styles for showing and hiding comments
+			add_action( 'wp_head', [ __CLASS__, 'coral_account_styles' ] );
+
 			/**
 			 * Since users login with Piano, we need to supply an endpoint that, given a Piano user's JWT,
 			 * can supply and sign a JWT that will be used to authorize a user with the Coral commenting system
@@ -106,6 +109,22 @@ class Coral_Comments {
 				}    
 			);
 		}
+	}
+
+	/**
+	 * Add styles to support showing/hiding comments
+	 * 
+	 * @return void
+	 */
+	public static function coral_account_styles() {
+		?>
+		<style type="text/css">
+			.coral-comments-show-hide.hide
+			{
+				display: none!important;
+			}
+		</style>
+		<?php
 	}
 
 	/**

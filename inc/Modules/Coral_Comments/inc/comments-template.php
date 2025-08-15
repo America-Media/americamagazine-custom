@@ -50,10 +50,10 @@ wp_add_inline_script(
 <button id="coral-comments-toggle" class="comments-toggle">
 	<div class="coral-comments-show-hide"><?php echo wp_kses( newspack_get_icon_svg( 'chevron_right', 24 ), newspack_sanitize_svgs() ); ?></div>
 	<span class="coral-comments-show-hide">Show</span>
-	<div class="coral-comments-show-hide" hidden><?php echo wp_kses( newspack_get_icon_svg( 'chevron_left', 24 ), newspack_sanitize_svgs() ); ?></div>
-	<span class="coral-comments-show-hide" hidden>Hide</span>&nbsp;Comments (
+	<div class="coral-comments-show-hide hide" ><?php echo wp_kses( newspack_get_icon_svg( 'chevron_left', 24 ), newspack_sanitize_svgs() ); ?></div>
+	<span class="coral-comments-show-hide hide">Hide</span>&nbsp;Comments (
 	<span class="coral-count" data-coral-id="<?php echo esc_attr( $story_id ); ?>" data-coral-url="<?php echo esc_url( wp_get_canonical_url() ); ?>" data-coral-notext="true"></span>)
 </button>
-<div id="coral-thread" class="coral-comments-show-hide" hidden></div>
+<div id="coral-thread" class="coral-comments-show-hide hide"></div>
 
 <?php

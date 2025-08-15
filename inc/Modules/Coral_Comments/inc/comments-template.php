@@ -54,6 +54,6 @@ wp_add_inline_script(
 	<span class="coral-comments-show-hide hide">Hide</span>&nbsp;Comments (
 	<span class="coral-count" data-coral-id="<?php echo esc_attr( $story_id ); ?>" data-coral-url="<?php echo esc_url( wp_get_canonical_url() ); ?>" data-coral-notext="true"></span>)
 </button>
-<div id="coral-thread" class="coral-comments-show-hide hide"></div>
+<div id="coral-thread" class="coral-comments-show-hide hide needsclick"></div>
 
 <?php

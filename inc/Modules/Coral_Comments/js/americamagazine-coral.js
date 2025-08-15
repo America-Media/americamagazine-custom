@@ -97,6 +97,15 @@
 								} );
 						},
 					] );
+
+					// After invoking the render, we need to stop propagation of touchend events inside the Coral embed
+					// because Perfmatters FastClick touchend handling breaks on iOS and requires double-tapping.
+					// For details: https://newspack-pub.slack.com/archives/C08MX2T0VPZ/p1755290714502889
+					document
+						.querySelector( '#coral-thread' )
+						.addEventListener( 'touchend', ( e ) => {
+							e.stopPropagation();
+						} );
 				}
 				americaUtils.toggleHidden( 'coral-comments-show-hide' );
 			} );

@@ -690,14 +690,20 @@ class App_Feeds {
 	 */
 	public static function format_terms_list( $list ) { 
 		if ( $list ) {
-			return array_map( 
-				function( $item ) {
-					return [
-						'id'   => $item->term_id,
-						'name' => $item->name,
-					];
+			return array_reduce(
+				$list, 
+				function( $carry, $item ) {
+					// Convention is that taxonomy terms starting with _ are hidden
+					// TODO: Revert this once the app can handle hiding these terms directly.
+					if ( ! str_starts_with( $item->name, '_' ) ) {
+						$carry[] = [
+							'id'   => $item->term_id,
+							'name' => $item->name,
+						];
+					}
+					return $carry;
 				},
-				$list 
+				[] 
 			);
 		} else {
 			return [];
